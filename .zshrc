@@ -1,5 +1,7 @@
-PATH=/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin:/usr/local/mongodb/bin:/brew/bin:/brew/sbin:/brew/share/npm/bin:$PATH
+PATH=/home/ryanp/bin:/ndn/dh/bin:/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin:/usr/local/mongodb/bin:/brew/bin:/brew/sbin:/brew/share/npm/bin:$PATH
+
 export NODE_PATH=/brew/lib/node
+export VIMRUNTIME=/usr/share/vim/vim71
 
 # zsh vim mode
 set -o vi
@@ -16,7 +18,6 @@ alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
-alias t="tmux"
 
 # ack-specific settings
 export ACK_COLOR_MATCH='red'
@@ -60,28 +61,14 @@ fg_white=%{$'\e[1;37m'%}
 alias py.test="py.test --tb=short"
 
 # version control info
-autoload -Uz vcs_info
 setopt prompt_subst
-zstyle ':vcs_info:*' stagedstr $'%F{green}●'
-zstyle ':vcs_info:*' unstagedstr '%F{yellow}●'
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' enable git svn
-precmd () { 
-    if [[ -z $(git ls-files --other --exclude-standard 2> /dev/null) ]] {
-        zstyle ':vcs_info:*' formats $'[%{\e[1;33m%}%b%F{foreground}:%c%u%F{foreground}] '
-    } else {
-        zstyle ':vcs_info:*' formats $'(%{\e[1;33m%}%b%F{foreground}:%c%u%F{white}●%F{foreground}) '
-    }
-    vcs_info
-}
-local git='$vcs_info_msg_0_'
 
 # Custom status line
-PS1="$(vim_flag)$(active_virtualenv)${git}${fg_lblue}%~ ${fg_white}$ "
+PS1="$(active_virtualenv)[${fg_yellow}FUBAR${fg_white}] ${fg_lblue}%~ ${fg_white}$ "
 
 # Show a green $ on the status line when vim mode is -- INSERT --
 function zle-line-init zle-keymap-select {
-    PS1="$(vim_flag)$(active_virtualenv)${git}${fg_lblue}%~ ${fg_lgreen}${${KEYMAP/vicmd/}/(main|viins)/$}${fg_white}${${KEYMAP/vicmd/$}/(main|viins)/}${fg_white} "
+    PS1="$(active_virtualenv)[${fg_yellow}FUBAR${fg_white}] ${fg_lblue}%~ ${fg_lgreen}${${KEYMAP/vicmd/}/(main|viins)/$}${fg_white}${${KEYMAP/vicmd/$}/(main|viins)/}${fg_white} "
     zle reset-prompt
 }
 zle -N zle-line-init
@@ -99,18 +86,3 @@ unsetopt correctall
 
 # General completion technique
 zstyle ':completion:*' completer _complete _match _approximate
-
-# Auto-attach to tmux
-if [ -z "$TMUX" ]; then
-    # not in a tmux session
-    tmux attach || tmux new
-else
-    # Listen for tmux clipboard changes
-    while true; do
-      if test -n "`tmux showb 2> /dev/null`"; then
-        tmux saveb -|pbcopy && tmux deleteb
-      fi
-      sleep 0.5
-    done &
-    clear
-fi
